@@ -29,7 +29,6 @@ const response = await fetch("https://api.groq.com/openai/v1/chat/completions", 
 
     const data = await response.json();
 
-    // ✅ Check for API failure FIRST
     if (!response.ok) {
       console.error("API error: Failed to get response from AI");
       return res.status(500).json({
@@ -37,7 +36,6 @@ const response = await fetch("https://api.groq.com/openai/v1/chat/completions", 
       });
     }
 
-    // ✅ Safe access
 const reply = data?.choices?.[0]?.message?.content;
 
     if (!reply) {
