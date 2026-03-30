@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarePassport — Carry Your Care Story</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: hsl(36, 28%, 96%);
+  --bg2: hsl(36, 20%, 92%);
+  --fg: hsl(210, 22%, 14%);
+  --card: hsl(36, 30%, 99%);
+  --primary: hsl(168, 38%, 36%);
+  --primary-light: hsl(168, 30%, 94%);
+  --primary-fg: hsl(36, 28%, 96%);
+  --muted: hsl(210, 10%, 50%);
+  --border: hsl(36, 16%, 86%);
+  --accent: hsl(24, 70%, 58%);
+  --step-active: hsl(168, 38%, 36%);
+  --step-done: hsl(168, 28%, 60%);
+  --step-idle: hsl(36, 16%, 80%);
+  --radius: 14px;
+  --shadow: 0 2px 16px hsla(210,20%,10%,0.07);
+  --shadow-lg: 0 8px 40px hsla(210,20%,10%,0.10);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* subtle grain overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+
+h1, h2, h3, h4 { font-family: 'Lora', Georgia, serif; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: hsla(36, 28%, 96%, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid hsla(36, 16%, 86%, 0.6);
+}
+.nav-inner {
+  max-width: 1000px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 58px; padding: 0 28px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Lora', Georgia, serif; font-size: 1.15rem; font-weight: 700; color: var(--fg);
+  text-decoration: none;
+}
+.nav-brand-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), hsl(168, 28%, 26%));
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-brand-icon svg { width: 16px; height: 16px; stroke: white; }
+.nav-pill {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 99px;
+  background: var(--primary-light); color: var(--primary);
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative; min-height: 92vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 80px 24px 60px; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 40%, hsla(168,38%,36%,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 70%, hsla(24,70%,58%,0.06) 0%, transparent 70%);
+}
+.hero-content {
+  position: relative; z-index: 1;
+  max-width: 720px; margin: 0 auto; text-align: center;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 16px; border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 0.8rem; font-weight: 600; color: var(--muted);
+  letter-spacing: 0.03em; text-transform: uppercase;
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease both;
+}
+.eyebrow-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--primary);
+  animation: pulse 2.5s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+
+.hero h1 {
+  font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+  font-weight: 700; line-height: 1.08;
+  letter-spacing: -0.025em;
+  margin-bottom: 22px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.hero h1 em {
+  font-style: italic; color: var(--primary);
+}
+.hero-sub {
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
+  color: var(--muted); max-width: 520px; margin: 0 auto 36px;
+  line-height: 1.75;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+.hero-cta {
+  display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 0.95rem;
+  padding: 13px 28px; border-radius: 12px; border: none; cursor: pointer;
+  transition: all 0.18s ease; text-decoration: none; white-space: nowrap;
+}
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), hsl(168,28%,26%));
+  color: white;
+  box-shadow: 0 4px 16px hsla(168,38%,36%,0.28);
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); box-shadow: 0 6px 22px hsla(168,38%,36%,0.36); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; filter: none; box-shadow: none; }
+.btn-ghost {
+  background: var(--card); color: var(--fg);
+  border: 1.5px solid var(--border);
+}
+.btn-ghost:hover { background: var(--bg2); border-color: hsl(36,16%,74%); }
+.btn-sm {
+  font-size: 0.8rem; font-weight: 600; padding: 7px 14px; border-radius: 8px;
+  background: transparent; color: var(--muted); border: none; cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.btn-sm:hover { color: var(--primary); background: var(--primary-light); }
+.btn-accent {
+  background: var(--accent); color: white;
+  box-shadow: 0 4px 14px hsla(24,70%,58%,0.25);
+}
+.btn-accent:hover:not(:disabled) { filter: brightness(1.08); }
+.btn-accent:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.action-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.8rem; font-weight: 600;
+  color: var(--muted); background: var(--card);
+  border: 1.5px solid var(--border);
+  padding: 7px 13px; border-radius: 8px; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.action-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.action-btn svg { flex-shrink: 0; stroke: currentColor; }
+
+input.filled, textarea.filled {
+  background: #f0f9f6;
+  transition: background 0.6s ease;
+}
+
+/* ── FEATURE STRIP ── */
+.features {
+  padding: 56px 24px;
+  border-top: 1px solid hsla(36,16%,86%,0.5);
+}
+.features-grid {
+  max-width: 880px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 28px;
+}
+@media(max-width:600px){ .features-grid { grid-template-columns: 1fr; } }
+.feat {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 12px;
+  padding: 28px 20px; border-radius: var(--radius);
+  background: var(--card); border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.feat:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.feat-icon {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: var(--primary-light);
+  display: flex; align-items: center; justify-content: center;
+}
+.feat-icon svg { width: 20px; height: 20px; stroke: var(--primary); }
+.feat h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.95rem; font-weight: 700; }
+.feat p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+/* ── FORM SECTION ── */
+.form-section {
+  padding: 80px 24px 100px;
+  max-width: 700px; margin: 0 auto;
+}
+.form-section-header { margin-bottom: 40px; }
+.form-section-header h2 {
+  font-size: clamp(1.7rem, 3.5vw, 2.1rem);
+  font-weight: 700; margin-bottom: 8px;
+}
+.form-section-header p { color: var(--muted); font-size: 0.95rem; }
+
+/* Progress */
+.progress-bar {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 36px;
+}
+.step-item {
+  display: flex; flex-direction: column; align-items: center;
+  flex: 1; position: relative;
+}
+.step-item:not(:last-child)::after {
+  content: '';
+  position: absolute; top: 15px; left: 50%; width: 100%;
+  height: 2px; background: var(--step-idle);
+  transition: background 0.4s;
+  z-index: 0;
+}
+.step-item.done:not(:last-child)::after { background: var(--step-done); }
+.step-circle {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--step-idle); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700;
+  position: relative; z-index: 1;
+  transition: background 0.3s, transform 0.3s;
+}
+.step-item.active .step-circle { background: var(--step-active); transform: scale(1.1); box-shadow: 0 0 0 4px hsla(168,38%,36%,0.15); }
+.step-item.done .step-circle { background: var(--step-done); }
+.step-label {
+  font-size: 0.68rem; font-weight: 600; color: var(--muted);
+  margin-top: 6px; text-align: center; letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.step-item.active .step-label { color: var(--primary); }
+
+/* Step panels */
+.step-panel {
+  display: none;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.step-panel.active {
+  display: block;
+  animation: stepIn 0.35s ease forwards;
+}
+.step-panel.exit {
+  animation: stepOut 0.2s ease forwards;
+}
+
+.form-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 32px;
+  margin-bottom: 20px;
+}
+.form-card h3 {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 10px;
+}
+.form-card .step-hint { font-size: 0.82rem; color: var(--muted); margin-bottom: 22px; }
+
+.field { margin-bottom: 20px; }
+.field label {
+  display: block; font-size: 0.82rem; font-weight: 600;
+  color: var(--fg); margin-bottom: 7px; letter-spacing: 0.01em;
+}
+.field label .optional {
+  font-weight: 400; color: var(--muted); font-size: 0.75rem; margin-left: 4px;
+}
+.field input, .field textarea, .field select {
+  width: 100%;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem;
+  padding: 11px 14px; border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--bg); color: var(--fg);
+  line-height: 1.6; resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px hsla(168,38%,36%,0.1);
+  background: var(--card);
+}
+.field textarea { min-height: 100px; }
+.field input::placeholder, .field textarea::placeholder { color: hsl(210,10%,68%); }
+
+/* Med entry */
+.med-entries { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
+.med-entry {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 18px;
+  position: relative;
+}
+.med-entry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:500px){ .med-entry-grid { grid-template-columns: 1fr; } }
+.med-entry-remove {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 1rem; line-height: 1;
+  padding: 2px 6px; border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.med-entry-remove:hover { color: hsl(0,60%,55%); background: hsl(0,60%,96%); }
+.add-med-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 0.82rem; font-weight: 600; color: var(--primary);
+  background: var(--primary-light); border: none; cursor: pointer;
+  padding: 8px 14px; border-radius: 8px;
+  transition: background 0.15s;
+}
+.add-med-btn:hover { background: hsl(168,30%,88%); }
+
+/* Step nav */
+.step-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 8px;
+}
+.step-counter { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+
+/* Example banner */
+.example-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-radius: 10px;
+  background: var(--primary-light); border: 1px dashed hsla(168,38%,36%,0.3);
+  margin-bottom: 28px; gap: 12px;
+}
+.example-banner p { font-size: 0.82rem; color: var(--primary); font-weight: 500; }
+.example-banner button {
+  font-size: 0.78rem; font-weight: 700; color: var(--primary);
+  background: white; border: 1.5px solid hsla(168,38%,36%,0.3);
+  padding: 6px 14px; border-radius: 8px; cursor: pointer;
+  white-space: nowrap; transition: background 0.15s;
+}
+.example-banner button:hover { background: var(--primary-light); }
+
+/* ── RESULTS ── */
+.results {
+  padding: 60px 24px 100px;
+  max-width: 700px; margin: 0 auto;
+  display: none;
+  position: relative; /* container for emergency overlay */
+}
+.results.visible { display: block; animation: fadeUp 0.5s ease both; }
+.results-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 28px; flex-wrap: wrap;
+}
+.results-header h2 { font-size: 1.6rem; font-weight: 700; }
+.results-header p { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+.results-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── EMERGENCY ── */
+.btn-emergency {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem; font-weight: 700;
+  padding: 9px 18px; border-radius: 10px; border: none; cursor: pointer;
+  background: hsl(0, 72%, 51%); color: white;
+  box-shadow: 0 4px 14px hsla(0,72%,51%,0.28);
+  transition: all 0.18s ease;
+}
+.btn-emergency:hover { filter: brightness(1.08); box-shadow: 0 6px 20px hsla(0,72%,51%,0.36); }
+.btn-emergency:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.emergency-overlay {
+  position: absolute; left: 0; right: 0; z-index: 150;
+  background: hsla(210,22%,14%,0.5); backdrop-filter: blur(6px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 18px 18px 0; animation: fadeIn 0.2s ease both;
+  top: auto; bottom: 0; /* top set dynamically in JS */
+  overflow: auto;
+}
+.emergency-modal {
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: 0 20px 60px hsla(0,72%,51%,0.15), var(--shadow-lg);
+  max-width: 480px; width: 100%;
+  border-top: 3px solid hsl(0,72%,51%);
+  animation: fadeUp 0.25s ease both;
+  max-height: 85vh; overflow-y: auto;
+}
+.emergency-modal-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 20px 24px 16px; gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.emergency-header-left { display: flex; align-items: flex-start; gap: 12px; }
+.emergency-icon-badge {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: hsl(0,72%,51%); color: white;
+  display: flex; align-items: center; justify-content: center;
+}
+.emergency-modal-header h3 {
+  font-size: 0.95rem; font-weight: 700; color: var(--fg);
+  font-family: 'Lora', serif;
+}
+.emergency-modal-header p { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.emergency-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 1rem; padding: 4px;
+  border-radius: 6px; transition: color 0.15s, background 0.15s; flex-shrink: 0;
+}
+.emergency-close:hover { color: var(--fg); background: var(--bg2); }
+
+.emergency-body { padding: 8px 0; }
+.emergency-section { padding: 14px 24px; border-bottom: 1px solid hsla(36,16%,86%,0.5); }
+.emergency-section:last-child { border-bottom: none; }
+.emergency-section-label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: hsl(0,72%,51%); margin-bottom: 8px;
+}
+.emergency-section-label svg { stroke: hsl(0,72%,51%); }
+.emergency-content {
+  font-size: 0.85rem; line-height: 1.7; color: var(--fg);
+}
+.emergency-content ul { padding-left: 16px; margin: 0; }
+.emergency-content li { margin-bottom: 3px; }
+
+.emergency-footer {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 14px 24px; border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+/* Tabs */
+.tabs-bar {
+  display: flex; gap: 4px;
+  background: var(--bg2); padding: 5px; border-radius: 12px;
+  margin-bottom: 24px; overflow-x: auto;
+}
+.tab-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 16px; border-radius: 9px; border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem; font-weight: 600;
+  background: transparent; color: var(--muted); cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.tab-btn.active { background: var(--card); color: var(--fg); box-shadow: 0 1px 4px hsla(0,0%,0%,0.07); }
+.tab-btn svg { width: 14px; height: 14px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Passport card */
+.passport-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.passport-header {
+  background: linear-gradient(135deg, var(--primary), hsl(168,28%,26%));
+  padding: 24px 28px; color: white;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.passport-header h3 { font-size: 1.1rem; font-weight: 700; font-family: 'Lora', serif; }
+.passport-header p { font-size: 0.78rem; opacity: 0.75; margin-top: 3px; }
+.passport-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: hsla(255,255%,255%,0.15);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.passport-icon svg { width: 22px; height: 22px; stroke: white; }
+.passport-body { padding: 0; }
+
+.passport-section {
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border);
+}
+.passport-section:last-child { border-bottom: none; }
+.passport-section-title {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--primary); margin-bottom: 10px;
+}
+.passport-section-title svg { width: 13px; height: 13px; stroke: var(--primary); }
+.passport-section-content {
+  font-size: 0.92rem; line-height: 1.75; color: var(--fg);
+}
+.passport-section-content.loading {
+  color: var(--muted); font-style: italic;
+}
+.passport-section-content h3 {
+  font-size: 0.95rem; font-weight: 700; margin: 12px 0 6px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.passport-section-content ul,
+.passport-section-content ol {
+  padding-left: 20px; margin: 6px 0;
+}
+.passport-section-content li {
+  margin-bottom: 4px; font-size: 0.92rem;
+}
+.passport-section-content p {
+  margin-bottom: 8px;
+}
+.passport-section-content strong {
+  font-weight: 700; color: var(--fg);
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg2) 25%, var(--border) 50%, var(--bg2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px; height: 14px; margin-bottom: 8px;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+.passport-actions {
+  display: flex; gap: 8px; padding: 18px 28px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  flex-wrap: wrap;
+}
+
+/* Translation tab */
+.lang-bar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.lang-select {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+  padding: 9px 36px 9px 14px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--card); color: var(--fg);
+  cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a9aaa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  transition: border-color 0.2s;
+}
+.lang-select:focus { outline: none; border-color: var(--primary); }
+.translate-waiting {
+  background: var(--card); border: 1.5px dashed var(--border);
+  border-radius: var(--radius); padding: 48px 32px;
+  text-align: center; color: var(--muted); font-style: italic; font-size: 0.9rem;
+}
+
+/* ── FOOTER ── */
+footer {
+  padding: 40px 24px; border-top: 1px solid hsla(36,16%,86%,0.5);
+  text-align: center;
+}
+footer p { font-size: 0.8rem; color: var(--muted); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes bounceDown { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
+@keyframes stepIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes stepOut { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(-12px)} }
+@keyframes passportReveal { from{opacity:0;transform:translateY(28px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+html { scroll-behavior: smooth; }
+
+/* Next button pulse after fill */
+.btn-primary.pulse-once {
+  animation: btnPulse 0.4s ease;
+}
+@keyframes btnPulse {
+  0%{transform:scale(1)} 40%{transform:scale(1.06)} 100%{transform:scale(1)}
+}
+
+/* Done checkmark in step circle */
+.step-circle.checked::after {
+  content: '✓';
+  font-size: 0.7rem;
+}
+.step-circle.checked { font-size: 0; }
+
+/* Result card reveal */
+.passport-card {
+  animation: none;
+}
+.passport-card.reveal {
+  animation: passportReveal 0.5s ease forwards;
+}
+
+/* Smooth tab switching */
+.tab-panel {
+  display: none;
+  animation: fadeUp 0.25s ease both;
+}
+.tab-panel.active { display: block; }
+
+/* Generate button spinner */
+.btn-spinner {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  animation: spin 0.7s linear infinite;
+  display: none; flex-shrink: 0;
+}
+.btn-primary.loading .btn-spinner { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.step-nav .btn-primary { transition: all 0.18s ease, transform 0.15s ease; }
+.step-nav .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px hsla(168,38%,36%,0.35); }
+
+.form-section input.filled,
+.form-section textarea.filled {
+  background: #f0f9f6 !important; /* try !important just for testing */
+  transition: background 0.6s ease;
+}
+
+/* ── PDF TARGET ── */
+#passport-pdf-target { background: white; }
+
+/* Responsive */
+@media(max-width:500px){
+  .form-card { padding: 22px 18px; }
+  .passport-header { padding: 18px 20px; }
+  .passport-section { padding: 18px 20px; }
+  .passport-actions { padding: 14px 20px; }
+  .results-header { flex-direction: column; }
+  .results-actions { width: 100%; }
+}
+
+@media(max-width:480px) {
+  .progress-bar { gap: 0; margin-bottom: 28px; }
+  .step-label { display: none; } /* hide labels, show only on active */
+  .step-item.active .step-label { display: block; font-size: 0.65rem; }
+  .step-circle { width: 26px; height: 26px; font-size: 0.7rem; }
+
+  /* Shrink connector lines */
+  .step-item:not(:last-child)::after { top: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="nav-brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+      </div>
+      CarePassport
+    </a>
+    <span class="nav-pill">Beta</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="eyebrow-dot"></span>
+      Psychiatric care communication
+    </div>
+    <h1>Your care story,<br><em>always understood</em></h1>
+    <p class="hero-sub">
+      When a patient changes doctors or countries, their story gets lost. CarePassport helps families document and communicate years of psychiatric care — clearly, in any language, to any new doctor.
+    </p>
+    <div class="hero-cta">
+      <a href="#form-section" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Create a Care Passport
+      </a>
+      <a href="#features-section" class="btn btn-ghost">See how it works</a>
+    </div>
+    <div style="margin-top:32px; animation: fadeUp 0.6s 0.5s ease both;">
+      <a href="#features-section" style="display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:0.82rem;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:bounceDown 1.4s ease infinite"><path d="m6 9 6 6 6-6"/></svg>
+        Scroll to learn more
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features-section">
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <h3>Patient-owned</h3>
+      <p>You control what's shared, with whom, and when. No database, no accounts — just a document you carry.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.93 3.12 2 2 0 0 1 3.91 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.07-1.07a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <h3>Doctor-ready</h3>
+      <p>Structured so a new psychiatrist understands the full picture in minutes — not months.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <h3>Any language</h3>
+      <p>Translate the full passport into Arabic, Hindi, Malayalam and more — for family members or doctors abroad.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FORM -->
+<section class="form-section" id="form-section">
+  <div class="form-section-header">
+    <h2>Build your Care Passport</h2>
+    <p>Answer a few guided questions. We'll turn your answers into a clear, structured document any doctor can understand.</p>
+    <p style="margin-top:10px; font-size:0.85rem; color:var(--primary); font-style:italic; opacity:0.85;">Take your time. There are no wrong answers here — just share what you know.</p>
+  </div>
+
+  <!-- Example banner -->
+  <div class="example-banner">
+    <p>Not sure where to start? Load a sample passport to see how it works.</p>
+    <button onclick="loadExample()">Try an example</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar" id="progress-bar">
+    <div class="step-item active" id="step-ind-1">
+      <div class="step-circle" onclick="goToStep(1)" style="cursor:pointer;" title="Background">1</div>
+      <span class="step-label">Background</span>
+    </div>
+    <div class="step-item" id="step-ind-2">
+      <div class="step-circle" onclick="goToStep(2)" style="cursor:pointer;" title="Medications">2</div>
+      <span class="step-label">Medications</span>
+    </div>
+    <div class="step-item" id="step-ind-3">
+      <div class="step-circle" onclick="goToStep(3)" style="cursor:pointer;" title="Behaviours">3</div>
+      <span class="step-label">Behaviours</span>
+    </div>
+    <div class="step-item" id="step-ind-4">
+      <div class="step-circle" onclick="goToStep(4)" style="cursor:pointer;" title="What Helps">4</div>
+      <span class="step-label">What Helps</span>
+    </div>
+  </div>
+
+  <!-- STEP 1: Background -->
+  <div class="step-panel active" id="step-1">
+    <div class="form-card">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Patient Background
+      </h3>
+      <p class="step-hint">Basic context to help a new doctor understand who this person is — not a diagnosis, just a story.</p>
+
+      <div class="field">
+        <label>Patient's first name <span class="optional">(optional — use a nickname if preferred)</span></label>
+        <input type="text" id="f-name" placeholder="e.g. Sara" />
+      </div>
+      <div class="field">
+        <label>Approximate age</label>
+        <input type="text" id="f-age" placeholder="e.g. 34" />
+      </div>
+      <div class="field">
+        <label>When did symptoms or concerns first appear?</label>
+        <input type="text" id="f-onset" placeholder="e.g. Around 2018, after a major life change" />
+      </div>
+      <div class="field">
+        <label>Current diagnosis, if known <span class="optional">(optional)</span></label>
+        <input type="text" id="f-diagnosis" placeholder="e.g. Bipolar II, Schizophrenia — or 'not formally diagnosed'" />
+      </div>
+      <div class="field">
+        <label>Any hospitalizations or major crises? <span class="optional">(optional)</span></label>
+        <textarea id="f-crises" placeholder="e.g. One hospitalization in 2020 during a severe episode, lasted 3 weeks"></textarea>
+      </div>
+    </div>
+    <div class="step-nav">
+      <span class="step-counter">Step 1 of 4</span>
+      <button class="btn btn-primary" onclick="goToStep(2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Medications -->
+  <div class="step-panel" id="step-2">
+    <div class="form-card">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+        Medication History
+      </h3>
+      <p class="step-hint">Not advice — just experience. What was tried, what helped, what didn't.</p>
+      <div class="med-entries" id="med-entries"></div>
+      <button class="add-med-btn" onclick="addMedEntry()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Add medication
+      </button>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
+      <span class="step-counter">Step 2 of 4</span>
+      <button class="btn btn-primary" onclick="goToStep(3)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Behaviours -->
+  <div class="step-panel" id="step-3">
+    <div class="form-card">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Baseline & Warning Signs
+      </h3>
+      <p class="step-hint">This is the most valuable section. New doctors rarely know what's "normal" for a specific patient.</p>
+
+      <div class="field">
+        <label>What behaviours are completely normal for this person?</label>
+        <textarea id="f-baseline" placeholder="e.g. She talks a lot when excited, prefers routine, sleeps 10 hours normally, often seems distant in new social situations"></textarea>
+      </div>
+      <div class="field">
+        <label>What are early warning signs that something is off?</label>
+        <textarea id="f-warnings" placeholder="e.g. Stops sleeping, becomes very talkative at odd hours, starts making big plans suddenly, withdraws from family"></textarea>
+      </div>
+      <div class="field">
+        <label>What behaviours signal a crisis and need immediate attention?</label>
+        <textarea id="f-crisis-signs" placeholder="e.g. Refuses all food, stops recognising family members, becomes aggressive or completely non-verbal"></textarea>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goToStep(2)">← Back</button>
+      <span class="step-counter">Step 3 of 4</span>
+      <button class="btn btn-primary" onclick="goToStep(4)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: What Helps -->
+  <div class="step-panel" id="step-4">
+    <div class="form-card">
+      <h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        What Helps & What Harms
+      </h3>
+      <p class="step-hint">Practical things that make a real difference — doctors genuinely want this information.</p>
+
+      <div class="field">
+        <label>What routines, environments, or habits help stabilise this person?</label>
+        <textarea id="f-helps" placeholder="e.g. Fixed sleep schedule, calm morning routine, being near family, light exercise, avoiding crowded places"></textarea>
+      </div>
+      <div class="field">
+        <label>What are known triggers that worsen symptoms?</label>
+        <textarea id="f-triggers" placeholder="e.g. Sleep disruption, conflict with specific family members, loud environments, major schedule changes"></textarea>
+      </div>
+      <div class="field">
+        <label>How does this person communicate best? <span class="optional">(optional)</span></label>
+        <textarea id="f-comms" placeholder="e.g. Responds better to calm, slow speech. Gets anxious with too many questions at once. Needs time to process before answering."></textarea>
+      </div>
+      <div class="field">
+        <label>Anything else a new doctor should know? <span class="optional">(optional)</span></label>
+        <textarea id="f-other" placeholder="e.g. Family is very involved in care. Patient prefers female doctors. Has a strong religious faith that is important to her."></textarea>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn btn-ghost" onclick="goToStep(3)">← Back</button>
+      <span class="step-counter">Step 4 of 4</span>
+      <button class="btn btn-primary" id="generate-btn" onclick="handleGenerate()">
+  <div class="btn-spinner"></div>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+  <span id="gen-btn-text">Generate Care Passport</span>
+</button>
+    </div>
+    <p id="generate-hint" style="display:none; margin-top:12px; font-size:0.82rem; color:var(--accent); text-align:right;">
+      💛 Add a little about this person first — even just a few words helps.
+    </p>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="results" id="results-section">
+  <div class="results-header">
+    <div>
+      <h2>Care Passport</h2>
+      <p id="passport-patient-label">Ready to share with any doctor or care provider.</p>
+    </div>
+    <div class="results-actions">
+      <button class="btn btn-ghost btn-sm" onclick="handleNewPassport()">← Start over</button>
+      <!-- Emergency Summary -->
+    <div id="emergency-summary-bar" style="display:none; margin-bottom:8px;">
+      <button class="btn-emergency" onclick="handleEmergencySummary()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span id="emergency-btn-text">Emergency Summary</span>
+      </button>
+      <span style="font-size:0.72rem; color:var(--muted);">One-tap critical info for emergencies</span>
+    </div>
+
+    <!-- Emergency Modal -->
+    <div class="emergency-overlay" id="emergency-overlay" style="display:none;" onclick="closeEmergency(event)">
+      <div class="emergency-modal">
+        <div class="emergency-modal-header">
+          <div class="emergency-header-left">
+            <div class="emergency-icon-badge">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div>
+              <h3 id="emergency-patient-name">Emergency Summary</h3>
+              <p>Critical information only — for first responders or new care providers</p>
+            </div>
+          </div>
+          <button class="emergency-close" onclick="closeEmergency()">✕</button>
+        </div>
+
+        <div class="emergency-body">
+          <div class="emergency-section">
+            <div class="emergency-section-label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/></svg>
+              Current Medications
+            </div>
+            <div id="emergency-meds" class="emergency-content"></div>
+          </div>
+
+          <div class="emergency-section">
+            <div class="emergency-section-label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Known Triggers
+            </div>
+            <div id="emergency-triggers" class="emergency-content"></div>
+          </div>
+
+          <div class="emergency-section">
+            <div class="emergency-section-label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              Signs of Crisis
+            </div>
+            <div id="emergency-crisis" class="emergency-content"></div>
+          </div>
+
+          <div class="emergency-section">
+            <div class="emergency-section-label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.93 3.12 2 2 0 0 1 3.91 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.07-1.07a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              What Helps in a Crisis
+            </div>
+            <div id="emergency-helps" class="emergency-content"></div>
+          </div>
+        </div>
+
+        <div class="emergency-footer">
+          <button class="btn-sm" onclick="copyEmergency()">📋 Copy all</button>
+          <button class="btn-sm" onclick="downloadEmergency()">⬇️ Download</button>
+          <span style="font-size:0.7rem; color:var(--muted); margin-left:auto;">⚠️ Not a medical record. Always contact emergency services first.</span>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" data-tab="passport" onclick="switchTab('passport')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        Care Passport
+      </button>
+      <button class="tab-btn" data-tab="translated" onclick="switchTab('translated')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Translated
+      </button>
+      <button class="tab-btn" data-tab="doctor" onclick="switchTab('doctor')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.93 3.12 2 2 0 0 1 3.91 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.07-1.07a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Questions for Doctor
+      </button>
+    </div>
+
+  <!-- Tab: Passport -->
+  <div class="tab-panel active" id="tab-passport">
+    <div class="passport-card" id="passport-pdf-target">
+      <div class="passport-header">
+        <div>
+          <h3 id="passport-title">Care Passport</h3>
+          <p id="passport-subtitle">Psychiatric care summary — prepared by family/caregiver</p>
+        </div>
+        <div class="passport-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+        </div>
+      </div>
+      <div class="passport-body">
+        <div class="passport-section">
+          <div class="passport-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Timeline & Background
+          </div>
+          <div class="passport-section-content loading" id="ps-timeline">
+            <div class="skeleton" style="width:90%"></div>
+            <div class="skeleton" style="width:75%"></div>
+            <div class="skeleton" style="width:82%"></div>
+          </div>
+        </div>
+        <div class="passport-section">
+          <div class="passport-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/></svg>
+            Medication Experience
+          </div>
+          <div class="passport-section-content loading" id="ps-meds">
+            <div class="skeleton" style="width:85%"></div>
+            <div class="skeleton" style="width:70%"></div>
+            <div class="skeleton" style="width:88%"></div>
+          </div>
+        </div>
+        <div class="passport-section">
+          <div class="passport-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            Baseline & Warning Signs
+          </div>
+          <div class="passport-section-content loading" id="ps-behaviours">
+            <div class="skeleton" style="width:92%"></div>
+            <div class="skeleton" style="width:68%"></div>
+            <div class="skeleton" style="width:80%"></div>
+          </div>
+        </div>
+        <div class="passport-section">
+          <div class="passport-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            What Helps & What Harms
+          </div>
+          <div class="passport-section-content loading" id="ps-helps">
+            <div class="skeleton" style="width:78%"></div>
+            <div class="skeleton" style="width:86%"></div>
+            <div class="skeleton" style="width:65%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="passport-actions" style="flex-direction:column; gap:12px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:hsl(36,60%,95%);border:1.5px solid hsl(36,50%,82%);border-radius:10px;width:100%;">
+          <span style="font-size:1rem;flex-shrink:0;margin-top:1px;">⚕️</span>
+          <p style="font-size:0.8rem;color:hsl(30,25%,35%);line-height:1.55;margin:0;">
+            <strong style="color:hsl(30,25%,25%);">This is not a medical record.</strong>
+            This document is a family-prepared care summary to support communication with healthcare providers. Always work with a qualified care team for diagnosis and treatment decisions.
+          </p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="action-btn" onclick="copySection('all')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            Copy all
+          </button>
+          <button class="action-btn" onclick="handleDownloadPDF()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </div> <!-- FIXED: Added missing closing tag for passport-card -->
+  </div> <!-- FIXED: Added missing closing tag for tab-passport -->
+
+  <!-- Tab: Translated -->
+  <div class="tab-panel" id="tab-translated">
+    <div class="lang-bar">
+      <select class="lang-select" id="lang-select">
+        <option value="">Choose a language</option>
+        <option value="Arabic">Arabic (عربي)</option>
+        <option value="Hindi">Hindi (हिंदी)</option>
+        <option value="Malayalam">Malayalam (മലയാളം)</option>
+        <option value="Tamil">Tamil (தமிழ்)</option>
+        <option value="Filipino/Tagalog">Filipino / Tagalog</option>
+        <option value="Urdu">Urdu (اردو)</option>
+        <option value="French">French (Français)</option>
+        <option value="Bengali">Bengali (বাংলা)</option>
+      </select>
+      <button class="btn btn-primary" id="translate-btn" onclick="handleTranslate()" style="padding:9px 20px; font-size:0.85rem;">
+        <span id="translate-btn-text">Translate Passport</span>
+      </button>
+    </div>
+    <div class="translate-waiting" id="translate-waiting">Choose a language above to translate the full passport</div>
+    <div id="translated-passport" style="display:none;">
+      <div class="passport-card">
+        <div class="passport-header">
+          <div>
+            <h3 id="translated-title">Translated Passport</h3>
+            <p id="translated-lang-label">Full passport translation</p>
+          </div>
+          <div class="passport-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+        </div>
+        <div class="passport-body">
+          <div class="passport-section">
+            <div class="passport-section-content" id="translated-content" style="white-space:pre-wrap; line-height:1.85;"></div>
+          </div>
+        </div>
+        <div class="passport-actions">
+          <button class="action-btn" onclick="copyText('translated-content')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            Copy
+          </button>
+          <button class="action-btn" onclick="handleDownloadTranslatedPDF()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Questions for Doctor -->
+  <div class="tab-panel" id="tab-doctor">
+    <div class="passport-card">
+      <div class="passport-header">
+        <div>
+          <h3>Questions for Your New Doctor</h3>
+          <p>Generated from your care story — bring these to your first appointment</p>
+          <p>💡 Translate these in the Translated tab </p>
+        </div>
+        <div class="passport-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        </div>
+      </div>
+      <div class="passport-body">
+        <div class="passport-section">
+          <div class="passport-section-content loading" id="ps-questions">
+            <div class="skeleton" style="width:88%"></div>
+            <div class="skeleton" style="width:72%"></div>
+            <div class="skeleton" style="width:80%"></div>
+            <div class="skeleton" style="width:65%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="passport-actions">
+        <button class="action-btn" onclick="copyText('ps-questions')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          Copy questions
+        </button>
+        <button class="action-btn" onclick="downloadQuestions()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>CarePassport helps you communicate — not diagnose. Always work with your care team. No data is stored or shared.</p>
+</footer>
+
+<script>
+// ── STATE ──
+let medCount = 0;
+let currentStep = 1;
+let passportData = {};
+let generatedPassportText = '';
+
+// ── STEP NAVIGATION ──
+function goToStep(n) {
+  document.getElementById(`step-${currentStep}`).classList.remove('active');
+  document.getElementById(`step-ind-${currentStep}`).classList.remove('active');
+  // Mark all steps before n as done
+  for (let i = 1; i < n; i++) {
+    document.getElementById(`step-ind-${i}`).classList.add('done');
+  }
+  // Unmark steps from n onwards
+  for (let i = n; i <= 4; i++) {
+    document.getElementById(`step-ind-${i}`).classList.remove('done');
+  }
+  currentStep = n;
+  document.getElementById(`step-${n}`).classList.add('active');
+  document.getElementById(`step-ind-${n}`).classList.add('active');
+  document.getElementById('form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── MEDICATIONS ──
+function addMedEntry(data = {}) {
+  medCount++;
+  const id = medCount;
+  const el = document.createElement('div');
+  el.className = 'med-entry';
+  el.id = `med-${id}`;
+  el.innerHTML = `
+    <button class="med-entry-remove" onclick="removeMed(${id})" title="Remove">✕</button>
+    <div class="med-entry-grid">
+      <div class="field" style="margin-bottom:0">
+        <label>Medication name</label>
+        <input type="text" id="med-name-${id}" placeholder="e.g. Quetiapine" value="${data.name||''}"/>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Why was it tried?</label>
+        <input type="text" id="med-why-${id}" placeholder="e.g. For sleep and mood stability" value="${data.why||''}"/>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>What improved?</label>
+        <input type="text" id="med-improved-${id}" placeholder="e.g. Sleep improved a lot" value="${data.improved||''}"/>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>What worsened or side effects?</label>
+        <input type="text" id="med-worsened-${id}" placeholder="e.g. Heavy sedation, weight gain" value="${data.worsened||''}"/>
+      </div>
+    </div>
+  `;
+  document.getElementById('med-entries').appendChild(el);
+}
+
+function removeMed(id) {
+  const el = document.getElementById(`med-${id}`);
+  if (el) el.remove();
+}
+
+function getMedications() {
+  const meds = [];
+  document.querySelectorAll('.med-entry').forEach(entry => {
+    const id = entry.id.replace('med-', '');
+    const name = document.getElementById(`med-name-${id}`)?.value?.trim();
+    if (!name) return;
+    meds.push({
+      name,
+      why: document.getElementById(`med-why-${id}`)?.value?.trim() || '',
+      improved: document.getElementById(`med-improved-${id}`)?.value?.trim() || '',
+      worsened: document.getElementById(`med-worsened-${id}`)?.value?.trim() || '',
+    });
+  });
+  return meds;
+}
+
+// ── EXAMPLE DATA ──
+function loadExample() {
+  const tabs = document.querySelector('.form-section .example-banner');
+
+  if (tabs) {
+    const offsetTop = tabs.getBoundingClientRect().top + window.pageYOffset;
+
+    window.scrollTo({
+      top: offsetTop - 5, // optional small offset so tabs aren't stuck to top
+      behavior: 'smooth'
+    });
+  }
+
+  // Helper to fill + highlight
+  function fill(el, value) {
+    if (!el) return;
+    el.value = value;
+    el.classList.add('filled');
+    setTimeout(() => el.classList.remove('filled'), 800);
+  }
+
+const steps = [
+  () => fill(document.getElementById('f-name'), 'Sara'),
+  () => fill(document.getElementById('f-age'), '34'),
+  () => fill(
+    document.getElementById('f-onset'),
+    'Around 2018, after a period of high stress at work and a family bereavement'
+  ),
+  () => fill(document.getElementById('f-diagnosis'), 'Bipolar II Disorder'),
+  () => fill(
+    document.getElementById('f-crises'),
+    'One hospitalization in early 2020 during a severe depressive episode, lasted 3 weeks. One acute manic episode in 2022 that was managed at home with adjusted medication.'
+  ),
+  () => {
+    document.getElementById('med-entries').innerHTML = '';
+    medCount = 0;
+
+    addMedEntry({
+      name: 'Quetiapine 100mg',
+      why: 'Mood stabilisation and sleep',
+      improved: 'Sleep significantly improved, fewer mood swings',
+      worsened: 'Heavy morning sedation, weight gain of 8kg over 6 months'
+    });
+
+    addMedEntry({
+      name: 'Lamotrigine 150mg',
+      why: 'Prevent depressive episodes',
+      improved: 'Fewer and shorter depressive episodes',
+      worsened: 'Initial rash at lower dose, no issues once titrated slowly'
+    });
+
+    addMedEntry({
+      name: 'Sertraline 50mg',
+      why: 'Tried for depression before diagnosis',
+      improved: 'Mood briefly lifted',
+      worsened: 'Triggered a hypomanic episode — stopped immediately'
+    });
+  },
+  () => fill(
+    document.getElementById('f-baseline'),
+    'Sara is naturally talkative and enthusiastic. She talks fast when excited — this is normal for her. She prefers a structured daily routine and sleeps 9-10 hours. She can seem emotionally distant in new social situations but warms up quickly.'
+  ),
+  () => fill(
+    document.getElementById('f-warnings'),
+    'Reduced sleep to under 6 hours for 2+ nights. Becomes unusually irritable or dismissive of family. Starts making big financial or life plans suddenly. Stops engaging with her morning routine.'
+  ),
+  () => fill(
+    document.getElementById('f-crisis-signs'),
+    'Completely stops eating. Refuses all medication. Becomes unable to recognise that she is unwell. In depression: stops speaking, does not leave bed for days.'
+  ),
+  () => fill(
+    document.getElementById('f-helps'),
+    'Fixed wake-up time (even on weekends). Morning walk. Being near her mother. Low-stimulation environments. Journalling. Consistent medication schedule.'
+  ),
+  () => fill(
+    document.getElementById('f-triggers'),
+    'Sleep disruption. Conflict with her partner. Loud, crowded environments. Sudden changes to plans. Too much caffeine. Skipping meals.'
+  ),
+  () => fill(
+    document.getElementById('f-comms'),
+    'Responds best to calm, unhurried conversation. Gets anxious if asked too many questions at once. Needs time to process before answering. Responds poorly to being rushed or dismissed.'
+  ),
+  () => fill(
+    document.getElementById('f-other'),
+    'Family is heavily involved and should be included in major care decisions. Sara has a strong faith and finds spiritual support helpful. She prefers female doctors when possible.'
+  ),
+];
+
+  let i = 0;
+  let delay = 500;      // start slow
+  const acceleration = 0.85; // speed up factor
+
+  function nextStep() {
+    steps[i]?.();
+    i++;
+    if (i >= steps.length) return;
+    // gradually reduce delay but keep a minimum
+    delay = Math.max(50, delay * acceleration);
+    setTimeout(nextStep, delay);
+  }
+
+  nextStep();
+}
+
+// ── COLLECT ALL DATA ──
+function collectData() {
+  return {
+    name: document.getElementById('f-name').value.trim() || 'the patient',
+    age: document.getElementById('f-age').value.trim(),
+    onset: document.getElementById('f-onset').value.trim(),
+    diagnosis: document.getElementById('f-diagnosis').value.trim(),
+    crises: document.getElementById('f-crises').value.trim(),
+    medications: getMedications(),
+    baseline: document.getElementById('f-baseline').value.trim(),
+    warnings: document.getElementById('f-warnings').value.trim(),
+    crisisSigns: document.getElementById('f-crisis-signs').value.trim(),
+    helps: document.getElementById('f-helps').value.trim(),
+    triggers: document.getElementById('f-triggers').value.trim(),
+    comms: document.getElementById('f-comms').value.trim(),
+    other: document.getElementById('f-other').value.trim(),
+  };
+}
+
+function buildPrompt(data, section) {
+  const medText = data.medications.length
+    ? data.medications.map(m => `- ${m.name}: tried for "${m.why}". Improved: ${m.improved || 'not noted'}. Worsened/side effects: ${m.worsened || 'not noted'}.`).join('\n')
+    : 'No medications listed.';
+
+  const fullContext = `
+Patient: ${data.name}, age ${data.age || 'unknown'}.
+Diagnosis: ${data.diagnosis || 'not formally diagnosed'}.
+Symptoms/concerns first appeared: ${data.onset || 'not specified'}.
+Hospitalizations/crises: ${data.crises || 'none noted'}.
+Medications:
+${medText}
+Baseline behaviours (normal for this person): ${data.baseline || 'not provided'}
+Early warning signs: ${data.warnings || 'not provided'}
+Crisis signs: ${data.crisisSigns || 'not provided'}
+What helps: ${data.helps || 'not provided'}
+Known triggers: ${data.triggers || 'not provided'}
+Communication notes: ${data.comms || 'not provided'}
+Other notes: ${data.other || 'none'}
+`;
+
+  const FORMAT = `
+Format rules (strictly follow):
+- Do NOT include the section title as a heading
+- Do not repeat any sentences or facts
+- Use **bold** for any sub-headings
+- Use bullet points (- ) for all list items
+- The Timeline & Background section only: write as plain prose paragraphs, no bullet points
+- No numbered lists except in the Questions section
+- No advisory language like "should", "must", "it is important to", "ensure that"
+- No conclusions, interpretations, or general closing statements
+- Only state what was explicitly provided — do not invent or infer
+`;
+
+const prompts = {
+  timeline: `Based on the following psychiatric care information provided by a family/caregiver, write a clear, warm, human-readable Timeline & Background section for a care passport. This will be read by a new doctor. Write in plain prose — 2-4 sentences. No bullet points for this section. Do not mention personality traits or baseline behaviours in this section — those belong in a separate section.${FORMAT}\n\n${fullContext}`,
+
+  meds: `Based on the following information, write a Medication Experience section for a psychiatric care passport. For each medication, use a **bold name** as sub-heading, then bullet points for: what it was tried for, what improved, and side effects or concerns. Do not give dosage advice.${FORMAT}\n\n${fullContext}`,
+
+  behaviours: `Based on the following information, write a Baseline & Warning Signs section for a psychiatric care passport. Use three **bold** sub-headings: **Normal for [name]**, **Early Warning Signs**, **Signs of Crisis**. Under each, use bullet points.${FORMAT}\n\n${fullContext}`,
+
+  helps: `Based on the following information, write a What Helps & What Harms section for a psychiatric care passport. Use **bold** sub-headings for each category (e.g. **Stabilising Routines**, **Known Triggers**, **Communication Preferences**). Under each, use bullet points.${FORMAT}\n\n${fullContext}`,
+
+  questions: `Based on the following psychiatric care history, generate 5-7 clear, practical questions this family/patient should ask their new doctor at their first appointment. Ground them in the specific history — monitoring, medication changes, warning signs, and how to reach the doctor in an emergency. Number them 1-7. Each question on its own line. No intro sentence. No closing sentence. No bullet points. No bold. Just the numbered questions.\n\n${fullContext}`,
+};
+
+  return prompts[section];
+}
+
+// ── GENERATE ──
+async function handleGenerate() {
+  passportData = collectData();
+
+  // Gentle validation — need at least a name + one meaningful field
+  const hasContent = passportData.onset || passportData.baseline || passportData.helps || passportData.medications.length > 0;
+  if (!hasContent) {
+    const hint = document.getElementById('generate-hint');
+    if (hint) {
+      hint.style.display = 'block';
+      setTimeout(() => hint.style.display = 'none', 4000);
+    }
+    return;
+  }
+
+  const btn = document.getElementById('generate-btn');
+  const btnText = document.getElementById('gen-btn-text');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btnText.textContent = 'Generating…';
+  // Update passport header
+  document.getElementById('passport-title').textContent = `${passportData.name}'s Care Passport`;
+  document.getElementById('passport-subtitle').textContent = `Psychiatric care summary — prepared by family/caregiver`;
+  document.getElementById('passport-patient-label').textContent = `${passportData.name} · Ready to share with any doctor or care provider`;
+  document.getElementById('translated-lang-label').textContent = 'Full passport translation';
+ 
+  document.getElementById('emergency-summary-bar').style.display = 'flex';
+  document.getElementById('emergency-summary-bar').style.alignItems = 'center';
+  document.getElementById('emergency-summary-bar').style.gap = '12px';
+
+  // Show results
+  const resultsEl = document.getElementById('results-section');
+  resultsEl.classList.add('visible');
+  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  switchTab('passport');
+
+  // Reset translated tab
+  document.getElementById('translate-waiting').style.display = '';
+  document.getElementById('translated-passport').style.display = 'none';
+
+  // Fire all 5 sections in parallel
+  const sections = ['timeline','meds','behaviours','helps','questions'];
+  const elMap = { timeline:'ps-timeline', meds:'ps-meds', behaviours:'ps-behaviours', helps:'ps-helps', questions:'ps-questions' };
+
+  await Promise.all(sections.map(async (sec) => {
+    const el = document.getElementById(elMap[sec]);
+    el.innerHTML = '<div class="skeleton" style="width:90%"></div><div class="skeleton" style="width:74%"></div><div class="skeleton" style="width:82%"></div>';
+    el.classList.add('loading');
+    try {
+      const res = await fetch('http://localhost:3000/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: buildPrompt(passportData, sec) })
+      });
+      const data = await res.json();
+      el.innerHTML = marked.parse(data.reply);
+      el.classList.remove('loading');
+    } catch(err) {
+      el.textContent = '⚠️ Could not generate this section. Please try again.';
+      el.classList.remove('loading');
+    }
+  }));
+
+  btn.disabled = false;
+  btn.classList.remove('loading');
+  btnText.textContent = 'Regenerate Passport';
+}
+
+// ── TRANSLATE ──
+async function handleTranslate() {
+  const lang = document.getElementById('lang-select').value;
+  if (!lang) return;
+
+  const btn = document.getElementById('translate-btn');
+  const btnText = document.getElementById('translate-btn-text');
+  btn.disabled = true;
+  btnText.textContent = 'Translating…';
+
+  document.getElementById('translate-waiting').style.display = 'none';
+  document.getElementById('translated-passport').style.display = 'none';
+
+  // Collect the generated text from all sections
+  const sections = ['ps-timeline','ps-meds','ps-behaviours','ps-helps','ps-questions'];
+  const fullPassport = sections.map(id => {
+    const el = document.getElementById(id);
+    return el ? el.textContent.trim() : '';
+  }).filter(Boolean).join('\n\n');
+
+const prompt = `
+You are a professional medical translator.
+
+Translate the text below into ${lang}.
+
+STRICT RULES:
+- Translate ONLY into ${lang}
+- Do NOT include any English words
+- Do NOT include Chinese characters or random symbols
+- Do NOT add explanations or extra content
+- Keep ALL formatting exactly the same (line breaks, bullet points, numbering)
+- Preserve the original tone: warm, clear, and human — not robotic
+- Make it natural and easy for a doctor and family member to read
+
+TEXT:
+${fullPassport}
+`;
+
+  try {
+    const res = await fetch('http://localhost:3000/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: prompt })
+    });
+    const data = await res.json();
+document.getElementById('translated-content').innerHTML = marked.parse(data.reply);
+    document.getElementById('translated-lang-label').textContent = `Full passport translated to ${lang}`;
+    document.getElementById('translated-passport').style.display = 'block';
+  } catch(err) {
+    document.getElementById('translate-waiting').style.display = '';
+    document.getElementById('translate-waiting').textContent = '⚠️ Translation failed. Please try again.';
+  }
+
+  btn.disabled = false;
+  btnText.textContent = 'Translate Passport';
+}
+
+// ── TABS ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+}
+
+// ── PDF ──
+function downloadCardAsPDF(cardEl, filename) {
+  // Clone the element and remove unwanted sections
+  const clone = cardEl.cloneNode(true);
+  
+  // Remove action buttons only (keep disclaimer)
+  const actions = clone.querySelector('.passport-actions');
+  if (actions) actions.remove();
+
+  // Create a hidden print iframe
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:800px;height:600px;';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument;
+  doc.open();
+  doc.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: white; color: #1a2530; }
+        .passport-card { background: white; border: 1px solid #e2d9cc; border-radius: 14px; overflow: hidden; }
+        .passport-header { background: linear-gradient(135deg, #2d7a68, #1e5245); padding: 24px 28px; color: white; display: flex; align-items: center; justify-content: space-between; }
+        .passport-header h3 { font-family: 'Lora', serif; font-size: 1.1rem; font-weight: 700; }
+        .passport-header p { font-size: 0.78rem; opacity: 0.75; margin-top: 3px; }
+        .passport-icon { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .passport-icon svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .passport-section { padding: 20px 28px; border-bottom: 1px solid #e2d9cc; }
+        .passport-section:last-child { border-bottom: none; }
+        .passport-section-title { display: flex; align-items: center; gap: 9px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #2d7a68; margin-bottom: 10px; }
+        .passport-section-title svg { width: 13px; height: 13px; stroke: #2d7a68; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .passport-section-content { font-size: 0.9rem; line-height: 1.75; color: #1a2530; }
+        .passport-section-content h3 { font-size: 0.92rem; font-weight: 700; margin: 10px 0 5px; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .passport-section-content ul, .passport-section-content ol { padding-left: 18px; margin: 4px 0; }
+        .passport-section-content li { margin-bottom: 4px; }
+        .passport-section-content p { margin-bottom: 6px; }
+        .passport-section-content strong { font-weight: 700; }
+        
+        /* Hide browser print headers/footers (date, URL, title, page numbers) */
+        @page {
+          margin: 10mm;
+          size: A4;
+        }
+        body {
+          margin: 0;
+          padding: 10px;
+        }
+        @media print {
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; margin: 0; padding: 8px; }
+        }
+      </style>
+    </head>
+    <body>
+      ${clone.outerHTML}
+    </body>
+    </html>
+  `);
+  doc.close();
+
+  iframe.onload = () => {
+    setTimeout(() => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => document.body.removeChild(iframe), 1000);
+    }, 800);
+  };
+}
+
+function handleDownloadPDF() {
+  const el = document.getElementById('passport-pdf-target');
+  const name = passportData.name || 'care-passport';
+  downloadCardAsPDF(el, `${name.toLowerCase().replace(/\s+/g,'-')}-care-passport.pdf`);
+}
+
+function handleDownloadTranslatedPDF() {
+  const el = document.querySelector('#translated-passport .passport-card');
+  const name = passportData.name || 'care-passport';
+  const lang = document.getElementById('lang-select').value || 'translated';
+  downloadCardAsPDF(el, `${name.toLowerCase().replace(/\s+/g,'-')}-passport-${lang.toLowerCase()}.pdf`);
+}
+
+function downloadQuestions() {
+  const text = document.getElementById('ps-questions')?.innerText?.trim();
+  if (!text || text.includes('Generating')) return;
+
+  const name = passportData.name || 'patient';
+  const blob = new Blob([
+    `Questions for ${name}'s New Doctor\n` +
+    `Prepared by CarePassport\n\n` +
+    text
+  ], { type: 'text/plain' });
+
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${name.toLowerCase()}-doctor-questions.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── COPY ──
+function copyText(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+    // find the button that triggered this by matching onclick
+    const btns = [...document.querySelectorAll('.action-btn')];
+    const btn = btns.find(b => b.getAttribute('onclick')?.includes(elId));
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied!';
+      btn.style.color = 'var(--primary)';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+    }
+  });
+}
+
+function copySection(which) {
+  const sections = ['ps-timeline','ps-meds','ps-behaviours','ps-helps'];
+  const text = sections.map(id => document.getElementById(id)?.textContent?.trim()).filter(Boolean).join('\n\n');
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.action-btn[onclick*="copySection"]');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied!';
+      btn.style.color = 'var(--primary)';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+    }
+  });
+}
+
+function handleShareLink() {
+  const btn = document.getElementById('share-btn');
+
+  // Encode the form data into the URL hash so it's fully shareable, no server needed
+  const payload = btoa(encodeURIComponent(JSON.stringify(passportData)));
+  const shareUrl = `${window.location.href.split('#')[0]}#data=${payload}`;
+
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    btn.textContent = '✓ Link copied!';
+    btn.style.color = 'var(--primary)';
+    setTimeout(() => {
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share`;
+      btn.style.color = '';
+    }, 2500);
+  });
+}
+
+// ── RESET ──
+function handleNewPassport() {
+  document.getElementById('results-section').classList.remove('visible');
+  goToStep(1);
+  document.getElementById('form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── EMERGENCY SUMMARY ──
+function handleEmergencySummary() {
+  const d = passportData;
+  if (!d.name) return;
+
+  // Patient name
+  document.getElementById('emergency-patient-name').textContent =
+    `${d.name} — Emergency Summary`;
+
+  // Medications
+  const medsEl = document.getElementById('emergency-meds');
+  if (d.medications?.length) {
+    medsEl.innerHTML = '<ul>' +
+      d.medications.map(m => `<li><strong>${m.name}</strong>${m.why ? ` — ${m.why}` : ''}</li>`).join('') +
+      '</ul>';
+  } else {
+    medsEl.textContent = 'No medications recorded.';
+  }
+
+  // Triggers
+  document.getElementById('emergency-triggers').textContent =
+    d.triggers || 'Not recorded.';
+
+  // Crisis signs
+  document.getElementById('emergency-crisis').textContent =
+    d.crisisSigns || 'Not recorded.';
+
+  // What helps
+  document.getElementById('emergency-helps').textContent =
+    d.helps || 'Not recorded.';
+
+  // Position overlay start below emergency summary bar
+  const overlay = document.getElementById('emergency-overlay');
+  const emergencyBar = document.getElementById('emergency-summary-bar');
+  const results = document.getElementById('results-section');
+
+  let startY = 0;
+  if (emergencyBar && emergencyBar.offsetHeight > 0 && emergencyBar.style.display !== 'none') {
+    startY = emergencyBar.offsetTop + emergencyBar.offsetHeight;
+  } else {
+    // Fallback to tabs if emergency bar not visible
+    const tabs = document.querySelector('.tabs-bar');
+    if (tabs) {
+      startY = tabs.offsetTop + tabs.offsetHeight;
+    }
+  }
+
+  // Keep one or two pixels clear as margin from top start
+  startY += 4;
+
+  overlay.style.top = startY + 'px';
+  overlay.style.height = `calc(100% - ${startY}px)`;
+  overlay.style.alignItems = 'flex-start';
+  overlay.style.paddingTop = '12px';
+
+  // Show modal
+  overlay.style.display = 'flex';
+}
+
+function closeEmergency(e) {
+  if (!e || e.target === document.getElementById('emergency-overlay')) {
+    document.getElementById('emergency-overlay').style.display = 'none';
+  }
+}
+
+function copyEmergency() {
+  const d = passportData;
+  const meds = d.medications?.length
+    ? d.medications.map(m => `  • ${m.name}${m.why ? ` (${m.why})` : ''}`).join('\n')
+    : '  None recorded';
+
+  const text = `EMERGENCY SUMMARY — ${d.name?.toUpperCase() || 'PATIENT'}
+${'─'.repeat(40)}
+
+CURRENT MEDICATIONS:
+${meds}
+
+KNOWN TRIGGERS:
+  ${d.triggers || 'Not recorded'}
+
+SIGNS OF CRISIS:
+  ${d.crisisSigns || 'Not recorded'}
+
+WHAT HELPS IN A CRISIS:
+  ${d.helps || 'Not recorded'}
+
+${'─'.repeat(40)}
+Generated by CarePassport. Not a medical record.
+Always contact emergency services first.`;
+
+  navigator.clipboard.writeText(text);
+}
+
+function downloadEmergency() {
+  const d = passportData;
+  const meds = d.medications?.length
+    ? d.medications.map(m => `  • ${m.name}${m.why ? ` (${m.why})` : ''}`).join('\n')
+    : '  None recorded';
+
+  const text = `EMERGENCY SUMMARY — ${d.name?.toUpperCase() || 'PATIENT'}
+${'─'.repeat(40)}
+
+CURRENT MEDICATIONS:
+${meds}
+
+KNOWN TRIGGERS:
+  ${d.triggers || 'Not recorded'}
+
+SIGNS OF CRISIS:
+  ${d.crisisSigns || 'Not recorded'}
+
+WHAT HELPS IN A CRISIS:
+  ${d.helps || 'Not recorded'}
+
+${'─'.repeat(40)}
+Generated by CarePassport. Not a medical record.
+Always contact emergency services first.`;
+
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${(d.name || 'patient').toLowerCase()}-emergency-summary.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// Init: add one empty med entry
+addMedEntry();
+
+(function loadFromHash() {
+  const hash = window.location.hash;
+  if (!hash.startsWith('#data=')) return;
+  try {
+    const data = JSON.parse(decodeURIComponent(atob(hash.replace('#data=', ''))));
+    if (data.name) document.getElementById('f-name').value = data.name;
+    if (data.age) document.getElementById('f-age').value = data.age;
+    if (data.onset) document.getElementById('f-onset').value = data.onset;
+    if (data.diagnosis) document.getElementById('f-diagnosis').value = data.diagnosis;
+    if (data.crises) document.getElementById('f-crises').value = data.crises;
+    if (data.baseline) document.getElementById('f-baseline').value = data.baseline;
+    if (data.warnings) document.getElementById('f-warnings').value = data.warnings;
+    if (data.crisisSigns) document.getElementById('f-crisis-signs').value = data.crisisSigns;
+    if (data.helps) document.getElementById('f-helps').value = data.helps;
+    if (data.triggers) document.getElementById('f-triggers').value = data.triggers;
+    if (data.comms) document.getElementById('f-comms').value = data.comms;
+    if (data.other) document.getElementById('f-other').value = data.other;
+    if (data.medications?.length) {
+      document.getElementById('med-entries').innerHTML = '';
+      medCount = 0;
+      data.medications.forEach(m => addMedEntry(m));
+    }
+  } catch(e) { /* malformed hash, ignore */ }
+})();
+
+</script>
+</body>
+</html>
